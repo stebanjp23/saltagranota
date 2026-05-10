@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 import com.juane.saltagranota.Objetos.Carro;
+import com.juane.saltagranota.Objetos.Moneda;
+import com.juane.saltagranota.Objetos.Pajaro;
 import com.juane.saltagranota.Objetos.Tronco;
 
 public class Filas {
@@ -19,6 +21,9 @@ public class Filas {
     public final Tipo tipo; // tipo de fila
     public final Array<Carro> carros; // coches en esta fila
     public final Array<Tronco> troncos; // troncos en esta fila
+    public final Array<Pajaro> pajaros; // pajaros en esta fila
+    public final Array<Moneda> monedas;
+
 
 
     public Filas(float y, Tipo tipo) {
@@ -26,16 +31,24 @@ public class Filas {
         this.tipo = tipo;
         carros = new Array<>();
         troncos = new Array<>();
+        pajaros = new Array<>();
+        monedas = new Array<>();
     }
 
     public void agregarCarro(Carro carro) {
         carros.add(carro);
     } // agrega un coche a la fila
-
+    public void agregarPajaro(Pajaro pj) {
+        pajaros.add(pj);
+    } // agrega nuevo pajaro a la fila
 
     public void agregarTronco(Tronco tronco) {
         troncos.add(tronco);
     } // agrega un tronco a la fila
+
+    public void agregarMoneda(Moneda moneda) {
+        monedas.add(moneda);
+    } // agrega una moneda a la fila
 
 
     public void update(float delta) { // actualiza la fila y sus elementos
@@ -46,6 +59,11 @@ public class Filas {
         for (Tronco tronco : troncos) {
             tronco.update(delta);
         }
+
+        for (Pajaro pajaro : pajaros) {
+            pajaro.update(delta);
+        }
+
     }
 
     // renderiza la fila y sus elementos
@@ -74,6 +92,18 @@ public class Filas {
         }
     }
 
+    public void renderPajaros(SpriteBatch batch) {
+        for (Pajaro pajaro : pajaros) {
+            pajaro.draw(batch);
+        }
+    }
+
+    public void renderMonedas(SpriteBatch batch) {
+        for (Moneda moneda : monedas) {
+            moneda.draw(batch);
+        }
+    }
+
 
     // mueve la fila y sus elementos
     public void shiftY(float deltaY) {
@@ -86,5 +116,14 @@ public class Filas {
         for (Tronco tronco : troncos) {
             tronco.setY(tronco.getY() + deltaY);
         }
+
+        for (Pajaro pajaro : pajaros) {
+            pajaro.setY(pajaro.getY() + deltaY);
+        }
+
+        for (Moneda moneda : monedas){
+            moneda.setY(moneda.getY()+deltaY);
+        }
+
     }
 }

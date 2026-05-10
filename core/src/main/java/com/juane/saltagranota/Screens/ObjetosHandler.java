@@ -11,13 +11,17 @@ import com.juane.saltagranota.Assets.AssetsDescriptor;
 import com.juane.saltagranota.Mapa.Filas;
 import com.juane.saltagranota.Objetos.Animal;
 import com.juane.saltagranota.Objetos.Carro;
+import com.juane.saltagranota.Objetos.Moneda;
+import com.juane.saltagranota.Objetos.Pajaro;
 import com.juane.saltagranota.Objetos.Tronco;
 
 public class ObjetosHandler {
     public enum ResultadoColision {
         NINGUNO,
         VIDA_PERDIDA_COCHE,
-        VIDA_PERDIDA_AGUA
+        VIDA_PERDIDA_PAJARO,
+        VIDA_PERDIDA_AGUA,
+        MONEDA
     }
 
     private static final float WORLD_HEIGHT = 480f;
@@ -30,6 +34,8 @@ public class ObjetosHandler {
     private final Texture texturaCesped;
     private final Texture texturaRio;
     private final Texture texturaCarretera;
+    private final Texture texturePajaro;
+    private final Texture textureMoneda;
     private boolean siguienteHaciaDerecha;
     private int siguientePeligro;
     private int siguienteFilaLogica;
@@ -46,6 +52,8 @@ public class ObjetosHandler {
         texturaCesped = assetManager.get(AssetsDescriptor.cesped);
         texturaRio = assetManager.get(AssetsDescriptor.rio);
         texturaCarretera = assetManager.get(AssetsDescriptor.road);
+        texturePajaro = assetManager.get(AssetsDescriptor.troncoImg);
+        textureMoneda = assetManager.get(AssetsDescriptor.moneda);
         crearNivelInicial();
     }
 
@@ -106,12 +114,35 @@ public class ObjetosHandler {
             poblarCarretera(fila, velocidad, vaHaciaDerecha, indicePeligro);
         } else if (fila.tipo == Filas.Tipo.AGUA) {
             poblarRio(fila, velocidad, vaHaciaDerecha, indicePeligro);
+        } else if (fila.tipo == Filas.Tipo.CESPED) {
+            poblarCesped(fila);
+        }
+    }
+
+    private void poblarCesped(Filas fila){
+
+        // 30% probabilidad de generar moneda
+        if (MathUtils.randomBoolean(0.3f)) {
+            System.out.println("Generando moneda");
+            // Posición aleatoria en X
+            float x = MathUtils.random(100f, 700f);
+
+            // Posición vertical dentro de la fila
+            float y = fila.y + 10f;
+
+            // Crear moneda
+            Moneda moneda = new Moneda(textureMoneda, x, y);
+            System.out.println(moneda.getX() + " " + moneda.getY());
+
+            // Añadir moneda a la fila
+            fila.agregarMoneda(moneda);
+
         }
     }
 
 
     private void poblarCarretera(Filas fila, float velocidad, boolean vaHaciaDerecha, int indicePeligro) {
-        int cantidadCarros = 1 + Math.min(indicePeligro / 3, 2);
+        int cantidadCarros = 1 + Math.min(indicePeligro / 3, 2); // Aumentamos la dificultad
 
         // Distribuimos los coches equitativamente en el ancho de la pantalla
         float espacioEntreCoches = Filas.WORLD_WIDTH / cantidadCarros;
@@ -131,6 +162,18 @@ public class ObjetosHandler {
                 carro.flip(true, false);
             }
             fila.agregarCarro(carro);
+        }
+
+        for (int i = 0; i < 1; i++) {
+
+            // Posición inicial repartida
+            float posicionX = desplazamientoInicial + (i * espacioEntreCoches);
+            Pajaro pajaro = new Pajaro(texturePajaro, posicionX, fila.y + 11f, velocidad);
+
+            if (!vaHaciaDerecha) {
+                pajaro.flip(true, false);
+            }
+            fila.agregarPajaro(pajaro);
         }
     }
 
@@ -287,6 +330,21 @@ public class ObjetosHandler {
                     return ResultadoColision.VIDA_PERDIDA_COCHE;
                 }
             }
+
+            for (Pajaro pj : filaActual.pajaros){
+                Rectangle hitboxPajaro = pj.getBoundingRectangle();
+                hitboxPajaro.set(
+                    hitboxPajaro.x + 5f,
+                    hitboxPajaro.y + 5f,
+                    hitboxPajaro.width - 10f,
+                    hitboxPajaro.height - 10f
+                );
+
+                if (hitboxRana.overlaps(hitboxPajaro)) {
+
+                    return ResultadoColision.VIDA_PERDIDA_PAJARO;
+                }
+            }
         } else if (filaActual.tipo == Filas.Tipo.AGUA) {
             boolean sobreTronco = false;
 
@@ -301,6 +359,16 @@ public class ObjetosHandler {
             if (!sobreTronco) {
 
                 return ResultadoColision.VIDA_PERDIDA_AGUA;
+            }
+        }else if (filaActual.tipo == Filas.Tipo.CESPED) {
+
+            for (int i = filaActual.monedas.size - 1; i >= 0; i--) {
+                Moneda moneda_actual = filaActual.monedas.get(i);
+
+                if (rectRana.overlaps(moneda_actual.getBoundingRectangle())) {
+                    filaActual.monedas.removeIndex(i);
+                    return ResultadoColision.MONEDA;
+                }
             }
         }
 
@@ -334,4 +402,17 @@ public class ObjetosHandler {
             fila.renderCoches(batch);
         }
     }
+
+    public void renderPajaros(SpriteBatch batch){
+        for (Filas fila : filas) {
+            fila.renderPajaros(batch);
+        }
+    }
+
+    public void renderMonedas(SpriteBatch batch){
+        for (Filas fila : filas) {
+            fila.renderMonedas(batch);
+        }
+    }
+
 }

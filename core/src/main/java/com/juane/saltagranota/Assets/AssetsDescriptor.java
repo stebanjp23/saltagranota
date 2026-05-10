@@ -5,6 +5,8 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 
+import java.awt.Image;
+
 public class AssetsDescriptor {
     public static final AssetDescriptor<Texture> convertible =
             new AssetDescriptor<>("Carros/convertible.png", Texture.class);
@@ -56,4 +58,8 @@ public class AssetsDescriptor {
             new AssetDescriptor<>("souds/sound-frogger-plunk.wav", Sound.class);
     public static final AssetDescriptor<Music> musicaFondo =
             new AssetDescriptor<>("souds/frogger-music.mp3", Music.class);
+    public static final AssetDescriptor<Texture> moneda =
+            new AssetDescriptor<>("coin.png", Texture.class);
+    public static final AssetDescriptor<Texture> bt_pause =
+            new AssetDescriptor<>("bt_pause.png", Texture.class);
 }
